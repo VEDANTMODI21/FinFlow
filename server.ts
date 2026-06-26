@@ -732,9 +732,20 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
+    // Serve static files but skip /api routes
+    app.use((req, res, next) => {
+      if (req.path.startsWith("/api")) {
+        return next();
+      }
+      express.static(distPath)(req, res, next);
+    });
+    // Fallback to index.html for SPA routing (only for non-API routes)
     app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+      if (!req.path.startsWith("/api")) {
+        res.sendFile(path.join(distPath, "index.html"));
+      } else {
+        res.status(404).json({ error: "API endpoint not found" });
+      }
     });
   }
 

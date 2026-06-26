@@ -379,7 +379,68 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
               </span>
             </div>
           </div>
+
+          {/* Auth Progress Steps */}
+          <div className="flex items-center justify-between mb-8 px-2">
+            <div className="flex items-center gap-2 flex-1">
+              {/* Step 1: Email */}
+              <div className="flex flex-col items-center flex-1">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  step === "email" || step === "password" || step === "otp" || step === "set-password"
+                    ? isDarkMode ? "bg-blue-600 text-white" : "bg-blue-500 text-white"
+                    : isDarkMode ? "bg-zinc-700 text-zinc-400" : "bg-slate-300 text-slate-500"
+                }`}>
+                  1
+                </div>
+              </div>
+              {/* Line 1 */}
+              <div className={`flex-1 h-0.5 transition-all ${
+                step === "password" || step === "otp" || step === "set-password"
+                  ? isDarkMode ? "bg-blue-600" : "bg-blue-500"
+                  : isDarkMode ? "bg-zinc-700" : "bg-slate-300"
+              }`} />
+              {/* Step 2: Password/OTP */}
+              <div className="flex flex-col items-center flex-1">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  step === "password" || step === "otp" || step === "set-password"
+                    ? isDarkMode ? "bg-blue-600 text-white" : "bg-blue-500 text-white"
+                    : isDarkMode ? "bg-zinc-700 text-zinc-400" : "bg-slate-300 text-slate-500"
+                }`}>
+                  2
+                </div>
+              </div>
+              {/* Line 2 */}
+              <div className={`flex-1 h-0.5 transition-all ${
+                step === "set-password"
+                  ? isDarkMode ? "bg-blue-600" : "bg-blue-500"
+                  : isDarkMode ? "bg-zinc-700" : "bg-slate-300"
+              }`} />
+              {/* Step 3: Final Setup */}
+              <div className="flex flex-col items-center flex-1">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  step === "set-password"
+                    ? isDarkMode ? "bg-blue-600 text-white" : "bg-blue-500 text-white"
+                    : isDarkMode ? "bg-zinc-700 text-zinc-400" : "bg-slate-300 text-slate-500"
+                }`}>
+                  3
+                </div>
+              </div>
+            </div>
+          </div>
  
+          {/* Step Labels */}
+          <div className="flex items-center justify-between mb-4 px-2 text-[9px] font-bold uppercase tracking-wider">
+            <span className={`transition-colors ${
+              step === "email" ? (isDarkMode ? "text-blue-400" : "text-blue-600") : (isDarkMode ? "text-slate-600" : "text-slate-400")
+            }`}>Email</span>
+            <span className={`transition-colors ${
+              step === "password" || step === "otp" ? (isDarkMode ? "text-blue-400" : "text-blue-600") : (isDarkMode ? "text-slate-600" : "text-slate-400")
+            }`}>{step === "password" ? "Password" : "Verify"}</span>
+            <span className={`transition-colors ${
+              step === "set-password" ? (isDarkMode ? "text-blue-400" : "text-blue-600") : (isDarkMode ? "text-slate-600" : "text-slate-400")
+            }`}>Secure</span>
+          </div>
+
           {/* Dynamic informative headers based on current state step */}
           <div className="space-y-2 mb-6">
             <h1 className={`text-2xl font-bold tracking-tight transition-colors ${
