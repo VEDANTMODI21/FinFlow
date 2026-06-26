@@ -1,3 +1,4 @@
+
 # FinFlow - Secure Personal Finance Manager
 
 A modern, full-stack personal finance application with secure OTP-based authentication, budget tracking, and expense management.
@@ -188,3 +189,4 @@ MIT License - See LICENSE file
 ---
 
 **Built with ❤️ for secure personal finance management**
+
