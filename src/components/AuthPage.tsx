@@ -402,26 +402,36 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
  
           {/* Success Alerts */}
           {successMsg && (
-            <div className={`mb-6 p-4 border rounded-2xl flex items-start gap-2 text-xs font-medium transition-colors ${
-              isDarkMode 
-                ? "bg-emerald-950/30 border-emerald-900/30 text-emerald-300" 
-                : "bg-emerald-50 border-emerald-100/50 text-slate-700"
-            }`}>
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className={`mb-6 p-4 border rounded-2xl flex items-start gap-2 text-xs font-medium transition-colors ${
+                isDarkMode 
+                  ? "bg-emerald-950/30 border-emerald-900/30 text-emerald-300" 
+                  : "bg-emerald-50 border-emerald-100/50 text-slate-700"
+              }`}>
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
               <p className="leading-relaxed">{successMsg}</p>
-            </div>
+            </motion.div>
           )}
- 
+
           {/* Error Alerts */}
           {error && (
-            <div className={`mb-6 p-4 border rounded-2xl flex items-start gap-2.5 text-xs font-medium transition-colors ${
-              isDarkMode 
-                ? "bg-red-950/30 border-red-900/30 text-red-300" 
-                : "bg-red-50 border-red-100/50 text-red-700"
-            }`}>
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className={`mb-6 p-4 border rounded-2xl flex items-start gap-2.5 text-xs font-medium transition-colors ${
+                isDarkMode 
+                  ? "bg-red-950/30 border-red-900/30 text-red-300" 
+                  : "bg-red-50 border-red-100/50 text-red-700"
+              }`}>
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
               <p className="leading-relaxed">{error}</p>
-            </div>
+            </motion.div>
           )}
  
           {/* ANIMATED FORM AREA */}
@@ -429,10 +439,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
             {step === "email" && (
               <motion.form 
                 key="email-form"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 onSubmit={handleCheckEmail} 
                 className="space-y-4"
               >
@@ -480,13 +490,14 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
                   )}
                 </motion.button>
               </motion.form>
-            )}            {step === "password" && (
+            )}
+            {step === "password" && (
               <motion.form 
                 key="password-form"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 onSubmit={handlePasswordSignIn} 
                 className="space-y-4"
               >
@@ -571,10 +582,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
             {step === "otp" && (
               <motion.form 
                 key="otp-form"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 onSubmit={handleVerifyOtp} 
                 className="space-y-4"
               >
@@ -654,10 +665,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
             {step === "set-password" && (
               <motion.form 
                 key="set-password-form"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 onSubmit={handleCreatePassword} 
                 className="space-y-4"
               >
