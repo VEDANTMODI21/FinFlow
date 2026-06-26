@@ -115,6 +115,20 @@ export default function BudgetTracker({
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // Reminders state
+  const [reminders, setReminders] = useState<Record<string, boolean>>({});
+  const toggleReminder = (billName: string) => {
+    setReminders(prev => {
+      const next = !prev[billName];
+      if (next) {
+        setNotifications(p => [`Reminder set for: ${billName}! We will alert you on the due date.`, ...p]);
+      } else {
+        setNotifications(p => [`Reminder cleared for: ${billName}.`, ...p]);
+      }
+      return { ...prev, [billName]: next };
+    });
+  };
+
   // Keyboard shortcut Ctrl+E for Quick Add Expense
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -550,9 +564,9 @@ export default function BudgetTracker({
   };
 
   return (
-    <div className={`min-h-[85vh] border rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl transition-colors duration-300 no-print ${
+    <div className={`min-h-[85vh] border rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl transition-all duration-300 no-print ${
       isDarkMode 
-        ? "bg-[#090d16] border-slate-800 text-slate-100" 
+        ? "bg-[#030303] border-zinc-900 text-zinc-100" 
         : "bg-slate-50/70 border-slate-200/50 text-slate-800"
     }`}>
       {/* Embedded print styles */}
@@ -581,26 +595,26 @@ export default function BudgetTracker({
       `}</style>
       
       {/* 1. Left Sidebar Navigation - Matching Image 3 layout */}
-      <aside className={`w-full md:w-64 border-b md:border-b-0 md:border-r flex flex-col justify-between shrink-0 transition-colors duration-300 ${
-        isDarkMode ? "bg-[#0f172a] border-slate-800" : "bg-white border-slate-100"
+      <aside className={`w-full md:w-64 border-b md:border-b-0 md:border-r flex flex-col justify-between shrink-0 transition-all duration-300 ${
+        isDarkMode ? "bg-[#09090b] border-zinc-900" : "bg-white border-slate-100"
       }`}>
         <div className="p-6">
           {/* Logo Brand Header */}
           <div className="flex items-center gap-3.5 mb-8">
             <div className="flex flex-col gap-1 items-end shrink-0">
               <div className="flex gap-1 items-end">
-                <span className="w-1.5 h-3.5 bg-blue-500 rounded-sm" />
-                <span className="w-1.5 h-5 bg-blue-600 rounded-sm" />
-                <span className="w-1.5 h-2.5 bg-blue-400 rounded-sm" />
+                <span className={`w-1.5 h-3.5 rounded-sm ${isDarkMode ? "bg-zinc-600" : "bg-blue-500"}`} />
+                <span className={`w-1.5 h-5 rounded-sm ${isDarkMode ? "bg-zinc-400" : "bg-blue-600"}`} />
+                <span className={`w-1.5 h-2.5 rounded-sm ${isDarkMode ? "bg-zinc-700" : "bg-blue-400"}`} />
               </div>
             </div>
             <div>
               <h2 className={`text-xl font-bold tracking-tight font-sans flex items-baseline transition-colors ${
-                isDarkMode ? "text-white" : "text-slate-800"
+                isDarkMode ? "text-zinc-100" : "text-slate-800"
               }`}>
                 FinFlow
               </h2>
-              <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block -mt-1">
+              <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest block -mt-1">
                 Personal Manager
               </span>
             </div>
@@ -608,100 +622,114 @@ export default function BudgetTracker({
 
           {/* Navigation Links */}
           <nav className="space-y-1">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02, x: 2 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab("dashboard")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 activeTab === "dashboard"
-                  ? isDarkMode ? "bg-blue-950/45 text-blue-400 font-bold" : "bg-blue-50 text-blue-600 font-bold"
-                  : isDarkMode ? "text-slate-400 hover:bg-slate-800/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  ? isDarkMode ? "bg-zinc-900 text-zinc-100 font-bold border border-zinc-800 shadow-sm" : "bg-blue-50 text-blue-600 font-bold"
+                  : isDarkMode ? "text-zinc-400 hover:bg-zinc-900/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
               }`}
             >
               <LayoutDashboard className="w-4.5 h-4.5" />
               Dashboard
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02, x: 2 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab("transactions")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 activeTab === "transactions"
-                  ? isDarkMode ? "bg-blue-950/45 text-blue-400 font-bold" : "bg-blue-50 text-blue-600 font-bold"
-                  : isDarkMode ? "text-slate-400 hover:bg-slate-800/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  ? isDarkMode ? "bg-zinc-900 text-zinc-100 font-bold border border-zinc-800 shadow-sm" : "bg-blue-50 text-blue-600 font-bold"
+                  : isDarkMode ? "text-zinc-400 hover:bg-zinc-900/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
               }`}
             >
               <ArrowRightLeft className="w-4.5 h-4.5" />
               Transactions
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02, x: 2 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab("budgets")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 activeTab === "budgets"
-                  ? isDarkMode ? "bg-blue-950/45 text-blue-400 font-bold" : "bg-blue-50 text-blue-600 font-bold"
-                  : isDarkMode ? "text-slate-400 hover:bg-slate-800/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  ? isDarkMode ? "bg-zinc-900 text-zinc-100 font-bold border border-zinc-800 shadow-sm" : "bg-blue-50 text-blue-600 font-bold"
+                  : isDarkMode ? "text-zinc-400 hover:bg-zinc-900/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
               }`}
             >
               <Percent className="w-4.5 h-4.5" />
               Budgets
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02, x: 2 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab("reports")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 activeTab === "reports"
-                  ? isDarkMode ? "bg-blue-950/45 text-blue-400 font-bold" : "bg-blue-50 text-blue-600 font-bold"
-                  : isDarkMode ? "text-slate-400 hover:bg-slate-800/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  ? isDarkMode ? "bg-zinc-900 text-zinc-100 font-bold border border-zinc-800 shadow-sm" : "bg-blue-50 text-blue-600 font-bold"
+                  : isDarkMode ? "text-zinc-400 hover:bg-zinc-900/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
               }`}
             >
               <PieIcon className="w-4.5 h-4.5" />
               Reports
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02, x: 2 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab("settings")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 activeTab === "settings"
-                  ? isDarkMode ? "bg-blue-950/45 text-blue-400 font-bold" : "bg-blue-50 text-blue-600 font-bold"
-                  : isDarkMode ? "text-slate-400 hover:bg-slate-800/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  ? isDarkMode ? "bg-zinc-900 text-zinc-100 font-bold border border-zinc-800 shadow-sm" : "bg-blue-50 text-blue-600 font-bold"
+                  : isDarkMode ? "text-zinc-400 hover:bg-zinc-900/40 hover:text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
               }`}
             >
               <Sliders className="w-4.5 h-4.5" />
               Settings
-            </button>
+            </motion.button>
           </nav>
         </div>
 
         {/* Sidebar Footer Details */}
-        <div className={`p-6 border-t transition-colors duration-300 ${
-          isDarkMode ? "border-slate-800 bg-[#0e1626]/40" : "border-slate-50 bg-slate-50/40"
+        <div className={`p-6 border-t transition-all duration-300 ${
+          isDarkMode ? "border-zinc-800 bg-zinc-950/40" : "border-slate-50 bg-slate-50/40"
         }`}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs select-none">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs select-none ${
+              isDarkMode ? "bg-zinc-800 text-zinc-100 border border-zinc-700" : "bg-blue-600 text-white"
+            }`}>
               {userEmail.substring(0, 1).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
               <p className={`text-xs font-semibold truncate transition-colors ${
-                isDarkMode ? "text-slate-200" : "text-slate-700"
+                isDarkMode ? "text-zinc-200" : "text-slate-700"
               }`} title={userEmail}>
                 {userEmail}
               </p>
-              <p className="text-[10px] font-medium text-slate-400">Owner User</p>
+              <p className="text-[10px] font-medium text-zinc-400">Owner User</p>
             </div>
           </div>
 
           <div className={`mt-4 pt-4 border-t ${
-            isDarkMode ? "border-slate-800" : "border-slate-200/50"
+            isDarkMode ? "border-zinc-800" : "border-slate-200/50"
           }`}>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onLogout}
               className={`w-full py-2 px-3 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 isDarkMode 
-                  ? "bg-red-950/30 hover:bg-red-900/40 text-red-400 border border-red-900/20" 
+                  ? "bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800" 
                   : "bg-red-50 hover:bg-red-100 text-red-600"
               }`}
             >
               <LogOut className="w-3.5 h-3.5" />
               Sign Out
-            </button>
+            </motion.button>
           </div>
         </div>
       </aside>
@@ -710,24 +738,26 @@ export default function BudgetTracker({
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* Top Header Panel - Matching Image 3 navbar */}
-        <header className={`h-16 px-6 flex items-center justify-between shrink-0 sticky top-0 z-30 transition-colors duration-300 ${
-          isDarkMode ? "bg-[#0f172a] border-b border-slate-800" : "bg-white border-b border-slate-100"
+        <header className={`h-16 px-6 flex items-center justify-between shrink-0 sticky top-0 z-30 transition-all duration-300 ${
+          isDarkMode ? "bg-[#09090b] border-b border-zinc-900" : "bg-white border-b border-slate-100"
         }`}>
           <div className="flex items-center gap-4">
             {/* Horizontal Tabs - Secondary Navigation representing top bar in Image 3 */}
             <div className="hidden lg:flex items-center gap-1">
               {(["dashboard", "transactions", "budgets", "reports", "settings"] as TabType[]).map((tab) => (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-1.5 rounded-full text-xs font-semibold capitalize transition-all cursor-pointer ${
                     activeTab === tab
-                      ? isDarkMode ? "bg-slate-800 text-white border border-slate-700" : "bg-slate-100 text-slate-800"
-                      : isDarkMode ? "text-slate-400 hover:text-slate-200" : "text-slate-400 hover:text-slate-600"
+                      ? isDarkMode ? "bg-zinc-900 text-white border border-zinc-800 shadow-xs" : "bg-slate-100 text-slate-800"
+                      : isDarkMode ? "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40" : "text-slate-400 hover:text-slate-600"
                   }`}
                 >
                   {tab}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
@@ -743,7 +773,7 @@ export default function BudgetTracker({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={`w-full border rounded-full py-1.5 pl-9 pr-4 text-xs font-medium focus:outline-none transition-all ${
                   isDarkMode 
-                    ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:bg-slate-900 focus:border-blue-500" 
+                    ? "bg-zinc-900 border-zinc-800 text-white placeholder-zinc-500 focus:bg-black focus:border-zinc-700" 
                     : "bg-slate-50 border-slate-200 text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500"
                 }`}
                 onFocus={() => {
@@ -755,55 +785,59 @@ export default function BudgetTracker({
             </div>
 
             {/* Local Theme Selector */}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 15 }}
+              whileTap={{ scale: 0.9 }}
               onClick={onToggleDarkMode}
               className={`p-2 rounded-full border transition-colors cursor-pointer ${
                 isDarkMode 
-                  ? "bg-slate-800 hover:bg-slate-700 text-yellow-400 border-slate-700" 
+                  ? "bg-zinc-900 hover:bg-zinc-800 text-yellow-400 border-zinc-800" 
                   : "bg-slate-50 hover:bg-slate-100 text-slate-500 border-slate-200"
               }`}
               title={isDarkMode ? "Toggle Light Mode" : "Toggle Dark Mode"}
             >
               {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
+            </motion.button>
 
             {/* Notification Bell with Dropdown */}
             <div className="relative">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setShowNotifications(!showNotifications)}
                 className={`p-2 rounded-full transition-colors relative cursor-pointer ${
-                  isDarkMode ? "text-slate-300 hover:text-white hover:bg-slate-800" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                  isDarkMode ? "text-zinc-300 hover:text-white hover:bg-zinc-900" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
                 }`}
               >
                 <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
                   <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
                 )}
-              </button>
+              </motion.button>
 
               {showNotifications && (
                 <div className={`absolute right-0 mt-2.5 w-80 rounded-2xl shadow-2xl py-3 z-50 text-xs font-sans border ${
-                  isDarkMode ? "bg-slate-800 border-slate-700 text-slate-100" : "bg-white border-slate-100 text-slate-600"
+                  isDarkMode ? "bg-zinc-900 border-zinc-800 text-zinc-100" : "bg-white border-slate-100 text-slate-600"
                 }`}>
                   <div className={`px-4 pb-2 border-b flex justify-between items-center font-bold ${
-                    isDarkMode ? "border-slate-700 text-slate-200" : "border-slate-100 text-slate-700"
+                    isDarkMode ? "border-zinc-800 text-zinc-200" : "border-slate-100 text-slate-700"
                   }`}>
                     <span>Notifications</span>
                     <button 
                       onClick={() => setNotifications([])} 
-                      className="text-[10px] text-blue-500 hover:underline cursor-pointer"
+                      className={`text-[10px] cursor-pointer ${isDarkMode ? "text-zinc-400 hover:text-zinc-100 hover:underline" : "text-blue-500 hover:underline"}`}
                     >
                       Clear All
                     </button>
                   </div>
                   <div className="max-h-60 overflow-y-auto pt-2">
                     {notifications.length === 0 ? (
-                      <p className="text-slate-400 text-center py-4">No new updates.</p>
+                      <p className="text-zinc-500 text-center py-4">No new updates.</p>
                     ) : (
                       notifications.map((n, i) => (
                         <div key={i} className={`px-4 py-2.5 border-b text-xs last:border-0 ${
                           isDarkMode 
-                            ? "hover:bg-slate-700/40 border-slate-700/50 text-slate-300" 
+                            ? "hover:bg-zinc-800/40 border-zinc-800/50 text-zinc-300" 
                             : "hover:bg-slate-50 border-slate-50/50 text-slate-600"
                         }`}>
                           {n}
@@ -817,11 +851,15 @@ export default function BudgetTracker({
 
             {/* Profile Avatar Image with dropdown */}
             <div className="relative">
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center gap-1 focus:outline-none cursor-pointer"
               >
-                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-500/30 hover:border-blue-500 transition-all shadow-xs">
+                <div className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all shadow-xs ${
+                  isDarkMode ? "border-zinc-800 hover:border-zinc-500" : "border-blue-500/30 hover:border-blue-500"
+                }`}>
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                     alt="avatar"
@@ -829,7 +867,7 @@ export default function BudgetTracker({
                     referrerPolicy="no-referrer"
                   />
                 </div>
-              </button>
+              </motion.button>
 
               <AnimatePresence>
                 {showProfileMenu && (
@@ -839,39 +877,43 @@ export default function BudgetTracker({
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
                     className={`absolute right-0 mt-3 w-64 rounded-2xl shadow-2xl p-4 border z-50 text-xs font-sans ${
-                      isDarkMode ? "bg-slate-800 border-slate-700 text-slate-100" : "bg-white border-slate-100 text-slate-800"
+                      isDarkMode ? "bg-zinc-900 border-zinc-800 text-zinc-100" : "bg-white border-slate-100 text-slate-800"
                     }`}
                   >
-                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200/40 dark:border-slate-700">
-                      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                    <div className="flex items-center gap-3 pb-3 border-b border-slate-200/40 dark:border-zinc-800">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                        isDarkMode ? "bg-zinc-800 text-zinc-100 border border-zinc-750" : "bg-blue-600 text-white"
+                      }`}>
                         {userEmail.substring(0, 1).toUpperCase()}
                       </div>
                       <div className="min-w-0">
                         <p className="font-bold text-xs truncate" title={userEmail}>Owner</p>
-                        <p className="text-[10px] text-slate-400 truncate">{userEmail}</p>
+                        <p className="text-[10px] text-zinc-400 truncate">{userEmail}</p>
                       </div>
                     </div>
-                    <div className="py-2.5 space-y-1.5 border-b border-slate-200/40 dark:border-slate-700">
+                    <div className="py-2.5 space-y-1.5 border-b border-slate-200/40 dark:border-zinc-800">
                       <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-slate-400 uppercase">Tier</span>
+                        <span className="text-zinc-500 uppercase">Tier</span>
                         <span className="text-emerald-500 font-bold">VERIFIED OWNERSHIP</span>
                       </div>
                       <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-slate-400 uppercase">Auth Mode</span>
-                        <span className="text-blue-500 font-bold">OTP + PASS</span>
+                        <span className="text-zinc-500 uppercase">Auth Mode</span>
+                        <span className={`font-bold ${isDarkMode ? "text-zinc-300" : "text-blue-500"}`}>OTP + PASS</span>
                       </div>
                     </div>
                     <div className="pt-2">
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
                           setShowProfileMenu(false);
                           onLogout();
                         }}
-                        className="w-full py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                        className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         Sign Out
-                      </button>
+                      </motion.button>
                     </div>
                   </motion.div>
                 )}
@@ -916,30 +958,40 @@ export default function BudgetTracker({
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
                     {/* Stat Card 1: Total Balance */}
-                    <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className={`lg:col-span-4 rounded-2xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden group hover:shadow-md transition-all ${
+                      isDarkMode ? "bg-zinc-900/40 border border-zinc-850 text-zinc-100" : "bg-white border border-slate-100 text-slate-800"
+                    }`}>
                       <div className="flex justify-between items-start">
                         <div>
-                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">
+                          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest block">
                             Total Balance
                           </span>
-                          <span className="text-3xl font-extrabold text-slate-800 tracking-tight block mt-2.5">
+                          <span className={`text-3xl font-extrabold tracking-tight block mt-2.5 ${
+                            isDarkMode ? "text-zinc-100" : "text-slate-800"
+                          }`}>
                             ${(totalIncome - totalExpenses).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>
                         </div>
-                        <div className="p-2.5 bg-blue-50 text-blue-500 rounded-full">
+                        <div className={`p-2.5 rounded-full ${
+                          isDarkMode ? "bg-zinc-800 text-zinc-300 border border-zinc-700" : "bg-blue-50 text-blue-500"
+                        }`}>
                           <DollarSign className="w-5 h-5" />
                         </div>
                       </div>
                       <div className="mt-4 flex items-center gap-1.5">
-                        <span className="text-xs font-semibold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md flex items-center gap-0.5">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-md flex items-center gap-0.5 ${
+                          isDarkMode ? "bg-emerald-950/45 text-emerald-400 border border-emerald-900/20" : "bg-emerald-50 text-emerald-600"
+                        }`}>
                           ↗ Trend
                         </span>
-                        <span className="text-[11px] text-slate-400 font-medium">Accumulating value securely</span>
+                        <span className="text-[11px] text-zinc-500 font-medium">Accumulating value securely</span>
                       </div>
                     </div>
 
                     {/* Stat Card 2: Budget Health Score */}
-                    <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-6 flex flex-col shadow-sm hover:shadow-md transition-all">
+                    <div className={`lg:col-span-4 rounded-2xl p-6 flex flex-col shadow-sm hover:shadow-md transition-all ${
+                      isDarkMode ? "bg-zinc-900/40 border border-zinc-850 text-zinc-100" : "bg-white border border-slate-100 text-slate-800"
+                    }`}>
                       <div className="flex items-center gap-4">
                         {/* Circular Progress Ring */}
                         <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
@@ -948,7 +1000,7 @@ export default function BudgetTracker({
                               cx="32"
                               cy="32"
                               r="26"
-                              className="stroke-slate-100"
+                              className={isDarkMode ? "stroke-zinc-800" : "stroke-slate-100"}
                               strokeWidth="5"
                               fill="transparent"
                             />
@@ -956,49 +1008,63 @@ export default function BudgetTracker({
                               cx="32"
                               cy="32"
                               r="26"
-                              className="stroke-blue-500 transition-all duration-1000"
+                              className="stroke-emerald-500 transition-all duration-1000"
                               strokeWidth="5"
                               fill="transparent"
                               strokeDasharray={`${2 * Math.PI * 26}`}
                               strokeDashoffset={`${2 * Math.PI * 26 * (1 - budgetHealthScore / 100)}`}
                             />
                           </svg>
-                          <div className="absolute inset-0 flex items-center justify-center text-blue-600">
+                          <div className={`absolute inset-0 flex items-center justify-center ${
+                            isDarkMode ? "text-emerald-400" : "text-blue-600"
+                          }`}>
                             <CheckCircle2 className="w-5 h-5" />
                           </div>
                         </div>
 
                         <div className="min-w-0">
-                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">
+                          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest block">
                             Budget Health Score
                           </span>
-                          <span className="text-lg font-extrabold text-slate-800 mt-0.5 flex items-center gap-1.5">
+                          <span className={`text-lg font-extrabold mt-0.5 flex items-center gap-1.5 ${
+                            isDarkMode ? "text-zinc-100" : "text-slate-800"
+                          }`}>
                             {budgetHealthScore}/100 
-                            <span className="text-xs font-bold text-emerald-500 px-1.5 py-0.5 bg-emerald-50 rounded-md">
+                            <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${
+                              isDarkMode ? "bg-emerald-950/45 text-emerald-400" : "bg-emerald-50 text-emerald-600"
+                            }`}>
                               (Good)
                             </span>
                           </span>
                         </div>
                       </div>
-                      <p className="text-[11.5px] text-slate-400 leading-relaxed font-medium mt-3">
+                      <p className="text-[11.5px] text-zinc-400 leading-relaxed font-medium mt-3">
                         Excellent budget health. You have managed your expenses perfectly within target thresholds this month!
                       </p>
                     </div>
 
                     {/* Stat Card 3: Quick Add Expense Button */}
-                    <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-6 flex flex-col justify-center items-center text-center shadow-sm hover:shadow-md transition-all relative">
-                      <button
+                    <div className={`lg:col-span-4 rounded-2xl p-6 flex flex-col justify-center items-center text-center shadow-sm hover:shadow-md transition-all relative ${
+                      isDarkMode ? "bg-zinc-900/40 border border-zinc-850 text-zinc-100" : "bg-white border border-slate-100"
+                    }`}>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
                           setTxType("expense");
                           setIsTxModalOpen(true);
                         }}
-                        className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+                        className={`w-full py-3 px-4 font-semibold text-sm rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs ${
+                          isDarkMode ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700" : "bg-slate-900 hover:bg-slate-800 text-white"
+                        }`}
                       >
                         <Plus className="w-5 h-5" />
                         Quick Add Expense
-                      </button>
-                      <p className="text-[11px] text-slate-400 font-medium mt-3">
-                        Press <kbd className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 font-mono text-[9px] shadow-xs">Ctrl+E</kbd> anywhere to trigger
+                      </motion.button>
+                      <p className="text-[11px] text-zinc-500 font-medium mt-3">
+                        Press <kbd className={`px-1.5 py-0.5 rounded font-mono text-[9px] shadow-xs ${
+                          isDarkMode ? "bg-zinc-800 border border-zinc-700 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-600"
+                        }`}>Ctrl+E</kbd> anywhere to trigger
                       </p>
                     </div>
 
@@ -1008,7 +1074,9 @@ export default function BudgetTracker({
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
                     {/* Chart Card: Income vs Expense */}
-                    <div className="lg:col-span-7 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                    <div className={`lg:col-span-7 rounded-2xl p-6 shadow-sm flex flex-col justify-between ${
+                      isDarkMode ? "bg-zinc-900/40 border border-zinc-850 text-zinc-100" : "bg-white border border-slate-100 text-slate-800"
+                    }`}>
                       <div className="flex justify-between items-center mb-4">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Monthly Income vs Expense</h3>
@@ -1188,13 +1256,15 @@ export default function BudgetTracker({
                     </div>
 
                     {/* Upcoming Bills Card */}
-                    <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col">
+                    <div className={`lg:col-span-4 rounded-2xl p-6 shadow-sm flex flex-col ${
+                      isDarkMode ? "bg-zinc-900/40 border border-zinc-850 text-zinc-100" : "bg-white border border-slate-100"
+                    }`}>
                       <div className="flex justify-between items-center mb-4">
                         <div>
-                          <h3 className="font-bold text-slate-800 text-sm">Upcoming Bills</h3>
-                          <p className="text-[11px] text-slate-400 font-medium">Avoid late payment penalties</p>
+                          <h3 className={`font-bold text-sm ${isDarkMode ? "text-zinc-100" : "text-slate-800"}`}>Upcoming Bills</h3>
+                          <p className="text-[11px] text-zinc-500 font-medium">Avoid late payment penalties</p>
                         </div>
-                        <span className="p-1.5 bg-slate-50 rounded-full text-slate-400">
+                        <span className={`p-1.5 rounded-full ${isDarkMode ? "bg-zinc-800 text-zinc-400" : "bg-slate-50 text-slate-400"}`}>
                           <Bell className="w-4 h-4" />
                         </span>
                       </div>
@@ -1203,44 +1273,94 @@ export default function BudgetTracker({
                         {/* Bill 1: Electric Bill */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                              isDarkMode ? "bg-amber-950/40 text-amber-400 border border-amber-900/20" : "bg-amber-50 text-amber-500"
+                            }`}>
                               <Zap className="w-4.5 h-4.5" />
                             </div>
                             <div>
-                              <h4 className="text-xs font-bold text-slate-800">Electric Bill</h4>
-                              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Due June 20</p>
+                              <h4 className={`text-xs font-bold ${isDarkMode ? "text-zinc-200" : "text-slate-800"}`}>Electric Bill</h4>
+                              <p className="text-[10px] font-medium text-zinc-500 mt-0.5">Due June 20</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-slate-800">- $110.00</span>
-                            <button
-                              onClick={() => handlePayBill("Electric Bill", 110.0)}
-                              className="text-[10px] font-semibold text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-lg border border-blue-100 transition-colors"
-                            >
-                              Pay
-                            </button>
+                            <span className={`text-xs font-bold ${isDarkMode ? "text-zinc-100" : "text-slate-800"}`}>- $110.00</span>
+                            <div className="flex items-center gap-1.5">
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => toggleReminder("Electric Bill")}
+                                className={`p-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-center transition-colors ${
+                                  reminders["Electric Bill"]
+                                    ? "bg-amber-500 text-white border-amber-500"
+                                    : isDarkMode
+                                      ? "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-750 hover:text-white"
+                                      : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-slate-800"
+                                }`}
+                                title={reminders["Electric Bill"] ? "Reminder active!" : "Set due date reminder"}
+                              >
+                                <Bell className={`w-3.5 h-3.5 ${reminders["Electric Bill"] ? "animate-bounce" : ""}`} />
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handlePayBill("Electric Bill", 110.0)}
+                                className={`text-[10px] font-semibold px-2 py-1.5 rounded-lg border cursor-pointer transition-colors ${
+                                  isDarkMode
+                                    ? "text-zinc-200 bg-zinc-800 border-zinc-700 hover:bg-zinc-750"
+                                    : "text-blue-600 hover:bg-blue-50 bg-blue-50/40 border-blue-100"
+                                }`}
+                              >
+                                Pay
+                              </motion.button>
+                            </div>
                           </div>
                         </div>
 
                         {/* Bill 2: Internet Bill */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                              isDarkMode ? "bg-zinc-850 text-zinc-300 border border-zinc-750" : "bg-blue-50 text-blue-500"
+                            }`}>
                               <Wifi className="w-4.5 h-4.5" />
                             </div>
                             <div>
-                              <h4 className="text-xs font-bold text-slate-800">Internet Subscription</h4>
-                              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Due June 25</p>
+                              <h4 className={`text-xs font-bold ${isDarkMode ? "text-zinc-200" : "text-slate-800"}`}>Internet Subscription</h4>
+                              <p className="text-[10px] font-medium text-zinc-500 mt-0.5">Due June 25</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-slate-800">- $65.00</span>
-                            <button
-                              onClick={() => handlePayBill("Internet Subscription", 65.0)}
-                              className="text-[10px] font-semibold text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-lg border border-blue-100 transition-colors"
-                            >
-                              Pay
-                            </button>
+                            <span className={`text-xs font-bold ${isDarkMode ? "text-zinc-100" : "text-slate-800"}`}>- $65.00</span>
+                            <div className="flex items-center gap-1.5">
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => toggleReminder("Internet Subscription")}
+                                className={`p-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-center transition-colors ${
+                                  reminders["Internet Subscription"]
+                                    ? "bg-amber-500 text-white border-amber-500"
+                                    : isDarkMode
+                                      ? "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-750 hover:text-white"
+                                      : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-slate-800"
+                                }`}
+                                title={reminders["Internet Subscription"] ? "Reminder active!" : "Set due date reminder"}
+                              >
+                                <Bell className={`w-3.5 h-3.5 ${reminders["Internet Subscription"] ? "animate-bounce" : ""}`} />
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handlePayBill("Internet Subscription", 65.0)}
+                                className={`text-[10px] font-semibold px-2 py-1.5 rounded-lg border cursor-pointer transition-colors ${
+                                  isDarkMode
+                                    ? "text-zinc-200 bg-zinc-800 border-zinc-700 hover:bg-zinc-750"
+                                    : "text-blue-600 hover:bg-blue-50 bg-blue-50/40 border-blue-100"
+                                }`}
+                              >
+                                Pay
+                              </motion.button>
+                            </div>
                           </div>
                         </div>
                       </div>
