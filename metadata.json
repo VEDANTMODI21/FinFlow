@@ -1,0 +1,6 @@
+{
+  "name": "OTP Verification Flow",
+  "description": "An interactive full-stack personal budget tracker with secure email-based OTP registration, visual recharts analytics, category spending budgets, and persistent disk-file databases.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
