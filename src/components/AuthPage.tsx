@@ -23,18 +23,26 @@ interface AuthPageProps {
 
 type AuthStep = "email" | "password" | "otp" | "set-password";
 
+interface AuthState {
+  isAuthenticated: boolean;
+  email: string;
+  sessionToken?: string;
+}
+
 export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode }: AuthPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   // Auth state flow
   const [step, setStep] = useState<AuthStep>("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [authState, setAuthState] = useState<AuthState>({ isAuthenticated: false, email: "" });
 
   // Submit Step 1: Check Email
   const handleCheckEmail = async (e: React.FormEvent) => {
@@ -119,6 +127,7 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
 
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
       const res = await fetch("/api/login-password", {
@@ -129,13 +138,24 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
 
       const json = await res.json();
       if (res.ok && json.success) {
-        onLoginSuccess(json.email);
+        setSuccessMsg("Welcome back! Logging you in...");
+        setAuthState({ 
+          isAuthenticated: true, 
+          email: json.email,
+          sessionToken: json.sessionToken 
+        });
+        // Store session for future validation
+        if (json.sessionToken) {
+          localStorage.setItem("authToken", json.sessionToken);
+          localStorage.setItem("authEmail", json.email);
+        }
+        setTimeout(() => onLoginSuccess(json.email), 1000);
       } else {
-        setError(json.error || "Invalid password.");
+        setError(json.error || "Invalid password. Please try again.");
       }
     } catch (err) {
       console.error(err);
-      setError("Server validation failed. Please check your credentials.");
+      setError("Server connection failed. Please check your credentials and try again.");
     } finally {
       setLoading(false);
     }
@@ -145,31 +165,35 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode || otpCode.trim().length < 4) {
-      setError("Please enter the complete verification code.");
+      setError("Please enter the complete 6-digit verification code.");
       return;
     }
 
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
       const res = await fetch("/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: otpCode })
+        body: JSON.stringify({ email, otp: otpCode.trim() })
       });
 
       const json = await res.json();
       if (res.ok && json.success) {
         // OTP verified successfully! Now prompt them to set a unique password
-        setSuccessMsg("Email verified! Let's protect your account with a unique password.");
+        setSuccessMsg("Email verified successfully! Now create a secure password for your account.");
         setStep("set-password");
+        // Reset password field for new entry
+        setPassword("");
+        setConfirmPassword("");
       } else {
-        setError(json.error || "Invalid authorization code.");
+        setError(json.error || "Invalid verification code. Please check and try again.");
       }
     } catch (err) {
       console.error(err);
-      setError("Server validation error. Please try again.");
+      setError("Server validation error. Please check your code and try again.");
     } finally {
       setLoading(false);
     }
@@ -178,12 +202,22 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
   // Submit new secure password creation
   const handleCreatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password || password.length < 6) {
+    
+    // Validation
+    if (!password) {
+      setError("Please enter a password.");
+      return;
+    }
+    if (password.length < 6) {
       setError("Password must be at least 6 characters long.");
       return;
     }
+    if (!confirmPassword) {
+      setError("Please confirm your password.");
+      return;
+    }
     if (password !== confirmPassword) {
-      setError("Passwords do not match. Please verify.");
+      setError("Passwords do not match. Please verify and try again.");
       return;
     }
 
@@ -199,7 +233,9 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
 
       const json = await res.json();
       if (res.ok && json.success) {
-        onLoginSuccess(json.email);
+        setSuccessMsg("Account created successfully! Logging you in...");
+        setAuthState({ isAuthenticated: true, email: json.email, sessionToken: json.sessionToken });
+        setTimeout(() => onLoginSuccess(json.email), 1000);
       } else {
         setError(json.error || "Failed to set unique password.");
       }
@@ -771,19 +807,26 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
                     <div className="relative">
                       <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
-                        type={showPassword ? "text" : "password"}
+                        type={showConfirmPassword ? "text" : "password"}
                         required
                         minLength={6}
-                        placeholder="Verify chosen password"
+                        placeholder="Re-enter your password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         disabled={loading}
-                        className={`w-full border rounded-xl py-3.5 pl-10 pr-4 text-xs font-semibold focus:outline-none transition-all placeholder-slate-400 ${
+                        className={`w-full border rounded-xl py-3.5 pl-10 pr-10 text-xs font-semibold focus:outline-none transition-all placeholder-slate-400 ${
                           isDarkMode 
                             ? "bg-zinc-900 border-zinc-800 text-white focus:bg-[#0c0c0c] focus:border-zinc-700" 
                             : "bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-blue-500"
                         }`}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                 </div>

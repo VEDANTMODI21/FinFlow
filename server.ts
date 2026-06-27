@@ -27,6 +27,13 @@ interface ServerLog {
   message: string;
 }
 
+interface AuthSession {
+  sessionToken: string;
+  email: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
 interface Transaction {
   id: string;
   email: string;
@@ -73,6 +80,7 @@ app.use(express.json());
 const mockEmails: MockEmail[] = [];
 const serverLogs: ServerLog[] = [];
 const otps = new Map<string, OtpStore>();
+const sessions = new Map<string, AuthSession>();
 
 // Helper to log events
 function addLog(level: "INFO" | "SUCCESS" | "WARNING" | "ERROR", service: string, message: string) {
@@ -437,10 +445,20 @@ app.post("/api/verify-otp", (req, res) => {
   // Create template profile on first login to make sure it's ready
   getUserData(email);
 
+  const sessionToken = "session_" + Math.random().toString(36).substring(2, 18);
+  const session: AuthSession = {
+    sessionToken,
+    email: email.toLowerCase().trim(),
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+  };
+  sessions.set(sessionToken, session);
+
   res.json({
     success: true,
     email: email.toLowerCase().trim(),
-    sessionToken: "session_" + Math.random().toString(36).substring(2, 18),
+    sessionToken,
+    expiresIn: 24 * 60 * 60, // seconds
   });
 });
 
@@ -477,11 +495,13 @@ app.post("/api/set-password", (req, res) => {
 app.post("/api/login-password", (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
+    addLog("WARNING", "Auth", "Login attempt with missing credentials");
     return res.status(400).json({ success: false, error: "Email and password are required." });
   }
   const key = email.toLowerCase().trim();
   const userData = database.users[key];
   if (!userData || !userData.password) {
+    addLog("WARNING", "Auth", `Login failed: account not found or not registered: ${email}`);
     return res.status(400).json({ success: false, error: "Account does not exist. Please register using OTP first." });
   }
   if (userData.password !== password) {
@@ -489,7 +509,43 @@ app.post("/api/login-password", (req, res) => {
     return res.status(400).json({ success: false, error: "Incorrect password." });
   }
   addLog("SUCCESS", "Auth-Router", `SUCCESSFULLY AUTHENTICATED via password: ${email}`);
-  res.json({ success: true, email: key });
+  
+  const sessionToken = "session_" + Math.random().toString(36).substring(2, 18);
+  const session: AuthSession = {
+    sessionToken,
+    email: key,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+  };
+  sessions.set(sessionToken, session);
+  
+  res.json({ 
+    success: true, 
+    email: key,
+    sessionToken,
+    expiresIn: 24 * 60 * 60, // seconds
+  });
+});
+
+// Session validation endpoint
+app.post("/api/validate-session", (req, res) => {
+  const { sessionToken } = req.body;
+  if (!sessionToken) {
+    return res.status(400).json({ success: false, error: "Session token required." });
+  }
+
+  const session = sessions.get(sessionToken);
+  if (!session || Date.now() > session.expiresAt) {
+    if (session) sessions.delete(sessionToken);
+    addLog("WARNING", "Auth", "Session validation failed or expired");
+    return res.status(401).json({ success: false, error: "Session expired. Please log in again." });
+  }
+
+  res.json({ 
+    success: true, 
+    email: session.email,
+    expiresIn: Math.floor((session.expiresAt - Date.now()) / 1000),
+  });
 });
 
 // --- BUDGET TRACKER API ENDPOINTS ---
