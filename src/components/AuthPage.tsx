@@ -88,11 +88,21 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
 
       const checkJson = await checkRes.json();
 
-      if (checkJson.hasPassword) {
+      if (authMode === "signin") {
+        // SIGN IN MODE: User MUST exist with password
+        if (!checkJson.hasPassword) {
+          setError("Account not found. Please sign up first or check your email.");
+          return;
+        }
         // User exists and has a password -> Go to password verification
         setSuccessMsg("Account found! Please enter your password.");
         setStep("password");
       } else {
+        // SIGN UP MODE: User MUST be new
+        if (checkJson.exists) {
+          setError("Account already exists. Please sign in instead.");
+          return;
+        }
         // User is new -> Request OTP first to verify identity
         setSuccessMsg("Verifying email address...");
         await sendOtpRequest();
