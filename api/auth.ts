@@ -1,34 +1,31 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import fs from "fs";
-import path from "path";
 
-// In-memory OTP storage
+// In-memory storage (persists across requests in same execution environment)
 const otps = new Map<string, { code: string; expiresAt: number }>();
 const sessions = new Map<
   string,
   { email: string; createdAt: number; expiresAt: number }
 >();
 
-// Database path
-const dbPath = path.join(process.cwd(), "db.json");
+// In-memory user database
+const users = new Map<string, any>();
 
 interface Database {
   users: Record<string, any>;
 }
 
-// Read database
-function readDatabase(): Database {
-  try {
-    const data = fs.readFileSync(dbPath, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return { users: {} };
-  }
+// Get database from memory
+function getDatabase(): Database {
+  const usersObj: Record<string, any> = {};
+  users.forEach((value, key) => {
+    usersObj[key] = value;
+  });
+  return { users: usersObj };
 }
 
-// Write database
-function writeDatabase(db: Database) {
-  fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+// Update database in memory
+function updateDatabase(email: string, data: any) {
+  users.set(email, data);
 }
 
 // Generate 6-digit OTP
@@ -48,7 +45,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   // CHECK EMAIL
   if (action === "check-email") {
-    const db = readDatabase();
+    const db = getDatabase();
     const normalizedEmail = email.toLowerCase().trim();
     const exists = !!db.users[normalizedEmail];
     const hasPassword = exists && !!db.users[normalizedEmail].password;
@@ -123,7 +120,6 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   // SET PASSWORD (New user)
   if (action === "set-password") {
     const normalizedEmail = email.toLowerCase().trim();
-    const db = readDatabase();
 
     if (!password || password.length < 6) {
       return res.status(400).json({
@@ -132,20 +128,16 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    if (!db.users[normalizedEmail]) {
-      db.users[normalizedEmail] = {
-        email: normalizedEmail,
-        password,
-        transactions: [],
-        budgets: [],
-        savingsGoals: [],
-        createdAt: new Date().toISOString(),
-      };
-    } else {
-      db.users[normalizedEmail].password = password;
-    }
+    const userData = {
+      email: normalizedEmail,
+      password,
+      transactions: [],
+      budgets: [],
+      savingsGoals: [],
+      createdAt: new Date().toISOString(),
+    };
 
-    writeDatabase(db);
+    updateDatabase(normalizedEmail, userData);
 
     const sessionToken = generateSessionToken();
     sessions.set(sessionToken, {
@@ -165,9 +157,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   // LOGIN PASSWORD
   if (action === "login-password") {
     const normalizedEmail = email.toLowerCase().trim();
-    const db = readDatabase();
+    const user = users.get(normalizedEmail);
 
-    const user = db.users[normalizedEmail];
     if (!user || !user.password) {
       return res.status(400).json({
         success: false,
