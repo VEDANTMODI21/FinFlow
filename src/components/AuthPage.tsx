@@ -137,7 +137,11 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
 
       const json = await res.json();
       if (res.ok && json.success) {
-        setSuccessMsg(`We've sent a 6-digit verification code to ${email}`);
+        if (json.devOtp) {
+          setSuccessMsg(`Dev Mode - Use OTP: ${json.devOtp}\n\nVerification code sent to ${email}`);
+        } else {
+          setSuccessMsg(`We've sent a 6-digit verification code to ${email}`);
+        }
         setStep("otp");
       } else {
         throw new Error(json.error || "Failed to send verification code. Please try again.");

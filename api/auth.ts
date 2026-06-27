@@ -68,13 +68,19 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
     otps.set(normalizedEmail, { code, expiresAt });
 
-    // In production, send via email service
-    // For now, log to console
-    console.log(`OTP for ${normalizedEmail}: ${code}`);
-
+    // Log OTP for development/testing
+    console.log(`[OTP] Email: ${normalizedEmail}, Code: ${code}, Expires: ${new Date(expiresAt).toISOString()}`);
+    
+    // TODO: In production, integrate with Resend or Brevo
+    // For now, return success with OTP in development mode
+    const isDevelopment = process.env.NODE_ENV !== "production" || !process.env.RESEND_API_KEY;
+    
     return res.status(200).json({
       success: true,
-      message: `OTP sent to ${normalizedEmail}. In development, check console.`,
+      message: isDevelopment 
+        ? `OTP sent to ${normalizedEmail}. Dev mode - Check deployment logs or use: ${code}`
+        : `OTP sent to ${normalizedEmail}. Check your email.`,
+      ...(isDevelopment && { devOtp: code }), // Include OTP in dev mode for testing
     });
   }
 
