@@ -64,21 +64,29 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
         body: JSON.stringify({ email })
       });
 
-      const checkJson = await checkRes.json();
       if (!checkRes.ok) {
-        throw new Error(checkJson.error || "Failed to check email status.");
+        const errorData = await checkRes.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error: ${checkRes.status}`);
       }
+
+      const checkJson = await checkRes.json();
 
       if (checkJson.hasPassword) {
         // User exists and has a password -> Go to password verification
+        setSuccessMsg("Account found! Please enter your password.");
         setStep("password");
       } else {
         // User is new -> Request OTP first to verify identity
+        setSuccessMsg("Verifying email address...");
         await sendOtpRequest();
       }
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Unable to check user account status.");
+      console.error("[Auth] Email check error:", err);
+      if (err.message.includes("JSON")) {
+        setError("Connection error. Please check your internet and try again.");
+      } else {
+        setError(err.message || "Unable to verify email. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -87,18 +95,31 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
   // Helper to trigger OTP delivery
   const sendOtpRequest = async () => {
     setError(null);
-    const res = await fetch("/api/send-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    });
+    try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
 
-    const json = await res.json();
-    if (res.ok && json.success) {
-      setSuccessMsg(`We've sent a 6-digit verification code to ${email}`);
-      setStep("otp");
-    } else {
-      throw new Error(json.error || "Failed to deliver security OTP.");
+      // Check if response is actually JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned invalid response format. Please check your connection.");
+      }
+
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setSuccessMsg(`We've sent a 6-digit verification code to ${email}`);
+        setStep("otp");
+      } else {
+        throw new Error(json.error || "Failed to send verification code. Please try again.");
+      }
+    } catch (err: any) {
+      if (err instanceof SyntaxError) {
+        throw new Error("Server response was not valid JSON. Please refresh and try again.");
+      }
+      throw err;
     }
   };
 
