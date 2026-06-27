@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Mail, 
@@ -29,6 +29,8 @@ interface AuthState {
   sessionToken?: string;
 }
 
+type AuthMode = "signin" | "signup";
+
 export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode }: AuthPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,11 +40,26 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   // Auth state flow
+  const [authMode, setAuthMode] = useState<AuthMode>("signin");
   const [step, setStep] = useState<AuthStep>("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [authState, setAuthState] = useState<AuthState>({ isAuthenticated: false, email: "" });
+  const [savePassword, setSavePassword] = useState(false);
+
+  // Load saved email and password on mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("savedEmail");
+    const savedPassword = localStorage.getItem("savedPassword");
+    const savePasswordPref = localStorage.getItem("savePasswordPref") === "true";
+
+    if (savedEmail) setEmail(savedEmail);
+    if (savedPassword && savePasswordPref) {
+      setPassword(savedPassword);
+      setSavePassword(true);
+    }
+  }, []);
 
   // Submit Step 1: Check Email
   const handleCheckEmail = async (e: React.FormEvent) => {
@@ -58,10 +75,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
 
     try {
       // Check if user exists and has a password
-      const checkRes = await fetch("/api/check-email", {
+      const checkRes = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ action: "check-email", email })
       });
 
       if (!checkRes.ok) {
@@ -96,10 +113,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
   const sendOtpRequest = async () => {
     setError(null);
     try {
-      const res = await fetch("/api/send-otp", {
+      const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ action: "send-otp", email })
       });
 
       // Check if response is actually JSON
@@ -151,10 +168,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
     setSuccessMsg(null);
 
     try {
-      const res = await fetch("/api/login-password", {
+      const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ action: "login-password", email, password })
       });
 
       const json = await res.json();
@@ -165,10 +182,17 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
           email: json.email,
           sessionToken: json.sessionToken 
         });
-        // Store session for future validation
+        // Store session and optional password for future validation
         if (json.sessionToken) {
           localStorage.setItem("authToken", json.sessionToken);
           localStorage.setItem("authEmail", json.email);
+          localStorage.setItem("savedEmail", email);
+          localStorage.setItem("savePasswordPref", savePassword.toString());
+          if (savePassword) {
+            localStorage.setItem("savedPassword", password);
+          } else {
+            localStorage.removeItem("savedPassword");
+          }
         }
         setTimeout(() => onLoginSuccess(json.email), 1000);
       } else {
@@ -195,10 +219,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
     setSuccessMsg(null);
 
     try {
-      const res = await fetch("/api/verify-otp", {
+      const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: otpCode.trim() })
+        body: JSON.stringify({ action: "verify-otp", email, otp: otpCode.trim() })
       });
 
       const json = await res.json();
@@ -246,10 +270,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
     setError(null);
 
     try {
-      const res = await fetch("/api/set-password", {
+      const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ action: "set-password", email, password })
       });
 
       const json = await res.json();
@@ -435,6 +459,50 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
                 Account Management Portal
               </span>
             </div>
+          </div>
+
+          {/* Sign In / Sign Up Toggle */}
+          <div className={`flex gap-3 mb-6 p-1 rounded-lg ${
+            isDarkMode ? "bg-zinc-900 border border-zinc-800" : "bg-slate-100 border border-slate-200"
+          }`}>
+            <button
+              onClick={() => {
+                setAuthMode("signin");
+                setStep("email");
+                setError(null);
+                setSuccessMsg(null);
+              }}
+              className={`flex-1 py-2 px-4 rounded-md font-semibold text-sm transition-all ${
+                authMode === "signin"
+                  ? isDarkMode 
+                    ? "bg-blue-600 text-white" 
+                    : "bg-blue-500 text-white"
+                  : isDarkMode 
+                    ? "text-slate-400 hover:text-slate-300" 
+                    : "text-slate-600 hover:text-slate-800"
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => {
+                setAuthMode("signup");
+                setStep("email");
+                setError(null);
+                setSuccessMsg(null);
+              }}
+              className={`flex-1 py-2 px-4 rounded-md font-semibold text-sm transition-all ${
+                authMode === "signup"
+                  ? isDarkMode 
+                    ? "bg-blue-600 text-white" 
+                    : "bg-blue-500 text-white"
+                  : isDarkMode 
+                    ? "text-slate-400 hover:text-slate-300" 
+                    : "text-slate-600 hover:text-slate-800"
+              }`}
+            >
+              Sign Up
+            </button>
           </div>
 
           {/* Auth Progress Steps */}
@@ -649,6 +717,27 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
                     </button>
                   </div>
                 </div>
+
+                {/* Save Password Checkbox */}
+                <label className="flex items-center gap-2.5 mt-3.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={savePassword}
+                    onChange={(e) => setSavePassword(e.target.checked)}
+                    className={`w-4 h-4 rounded cursor-pointer accent-blue-500 transition-all ${
+                      isDarkMode 
+                        ? "bg-zinc-800 border-zinc-700" 
+                        : "bg-slate-100 border-slate-300"
+                    }`}
+                  />
+                  <span className={`text-xs font-medium transition-colors ${
+                    isDarkMode 
+                      ? "text-slate-400 group-hover:text-slate-300" 
+                      : "text-slate-600 group-hover:text-slate-800"
+                  }`}>
+                    Save password on this device
+                  </span>
+                </label>
  
                 <motion.button
                   whileHover={{ scale: 1.02 }}
