@@ -377,21 +377,18 @@ app.post("/api/send-otp", async (req, res) => {
         throw new Error(errorData.message || JSON.stringify(errorData) || `HTTP error ${response.status}`);
       }
     } else {
-      // DEV MODE: No email service configured, return OTP for frontend to display
-      addLog("WARNING", "OTP-Engine", `Dev mode: Returning OTP directly for ${email}`);
-      // Continue to return dev OTP response below
-    }
-  } catch (error: any) {
-    addLog("ERROR", serviceUsed, `Failed real dispatch: ${error.message || error}`);
-    // In dev mode, don't fail - still return the OTP
-    if (!process.env.RESEND_API_KEY && !process.env.BREVO_API_KEY) {
-      addLog("WARNING", "OTP-Engine", `Dev mode fallback: Returning OTP for ${email}`);
-    } else {
+      addLog("ERROR", "OTP-Engine", `Email service not configured. Set RESEND_API_KEY or BREVO_API_KEY.`);
       return res.status(500).json({
         success: false,
-        error: `Failed to deliver email via ${serviceUsed}: ${error.message || "Unknown mailer error."}`
+        error: "Email service not configured. Please contact administrator."
       });
     }
+  } catch (error: any) {
+    addLog("ERROR", serviceUsed, `Failed to send OTP: ${error.message || error}`);
+    return res.status(500).json({
+      success: false,
+      error: `Failed to deliver email via ${serviceUsed}: ${error.message || "Unknown mailer error."}`
+    });
   }
 
   // Store in mock inbox for offline references
@@ -410,9 +407,7 @@ app.post("/api/send-otp", async (req, res) => {
   res.json({
     success: true,
     email,
-    devOtp: otp,  // Return OTP in dev mode
-    sentRealEmail,
-    serviceUsed,
+    message: "OTP sent to your email. Please check your inbox."
   });
 });
 
