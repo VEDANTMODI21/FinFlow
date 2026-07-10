@@ -75,10 +75,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
 
     try {
       // Check if user exists and has a password
-      const checkRes = await fetch("/api/auth", {
+      const checkRes = await fetch("/api/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "check-email", email })
+        body: JSON.stringify({ email })
       });
 
       if (!checkRes.ok) {
@@ -123,10 +123,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
   const sendOtpRequest = async () => {
     setError(null);
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "send-otp", email })
+        body: JSON.stringify({ email })
       });
 
       // Check if response is actually JSON
@@ -182,10 +182,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
     setSuccessMsg(null);
 
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/api/login-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login-password", email, password })
+        body: JSON.stringify({ email, password })
       });
 
       const json = await res.json();
@@ -233,10 +233,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
     setSuccessMsg(null);
 
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify-otp", email, otp: otpCode.trim() })
+        body: JSON.stringify({ email, otp: otpCode.trim() })
       });
 
       const json = await res.json();
@@ -284,10 +284,10 @@ export default function AuthPage({ onLoginSuccess, isDarkMode, onToggleDarkMode 
     setError(null);
 
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/api/set-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "set-password", email, password })
+        body: JSON.stringify({ email, password })
       });
 
       const json = await res.json();

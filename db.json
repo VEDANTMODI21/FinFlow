@@ -132,6 +132,130 @@
           "current": 4500
         }
       ]
+    },
+    "vedantmodi@example.com": {
+      "transactions": [
+        {
+          "id": "t_init_0",
+          "email": "vedantmodi@example.com",
+          "type": "income",
+          "amount": 10400.25,
+          "category": "Salary",
+          "date": "2024-05-31",
+          "description": "Starting Balance Carryover"
+        },
+        {
+          "id": "t_init_1",
+          "email": "vedantmodi@example.com",
+          "type": "income",
+          "amount": 5200,
+          "category": "Salary",
+          "date": "2024-06-01",
+          "description": "Monthly Direct Deposit"
+        },
+        {
+          "id": "t_init_2",
+          "email": "vedantmodi@example.com",
+          "type": "expense",
+          "amount": 1350,
+          "category": "Rent & Utilities",
+          "date": "2024-06-01",
+          "description": "Apartment Rental & Utilities"
+        },
+        {
+          "id": "t_init_3",
+          "email": "vedantmodi@example.com",
+          "type": "expense",
+          "amount": 160,
+          "category": "Transportation",
+          "date": "2024-06-02",
+          "description": "Monthly Transit Pass"
+        },
+        {
+          "id": "t_init_4",
+          "email": "vedantmodi@example.com",
+          "type": "expense",
+          "amount": 387.35,
+          "category": "Food & Dining",
+          "date": "2024-06-03",
+          "description": "Weekly Groceries"
+        },
+        {
+          "id": "t_init_5",
+          "email": "vedantmodi@example.com",
+          "type": "expense",
+          "amount": 1070,
+          "category": "Savings Transfer",
+          "date": "2024-06-05",
+          "description": "Transfer to Emergency Fund"
+        },
+        {
+          "id": "t_init_6",
+          "email": "vedantmodi@example.com",
+          "type": "expense",
+          "amount": 15.99,
+          "category": "Entertainment",
+          "date": "2024-06-13",
+          "description": "Netflix Subscription"
+        },
+        {
+          "id": "t_init_7",
+          "email": "vedantmodi@example.com",
+          "type": "expense",
+          "amount": 120.15,
+          "category": "Food & Dining",
+          "date": "2024-06-14",
+          "description": "Trader Joe's"
+        },
+        {
+          "id": "t_init_8",
+          "email": "vedantmodi@example.com",
+          "type": "expense",
+          "amount": 34.01,
+          "category": "Entertainment",
+          "date": "2024-06-14",
+          "description": "Amazon Order"
+        },
+        {
+          "id": "t_init_9",
+          "email": "vedantmodi@example.com",
+          "type": "expense",
+          "amount": 12.5,
+          "category": "Food & Dining",
+          "date": "2024-06-15",
+          "description": "Starbucks"
+        }
+      ],
+      "budgets": [
+        {
+          "category": "Food & Dining",
+          "limit": 800
+        },
+        {
+          "category": "Rent & Utilities",
+          "limit": 1500
+        },
+        {
+          "category": "Transportation",
+          "limit": 400
+        },
+        {
+          "category": "Entertainment",
+          "limit": 200
+        },
+        {
+          "category": "Savings Transfer",
+          "limit": 1500
+        }
+      ],
+      "savingsGoals": [
+        {
+          "id": "g_init_1",
+          "name": "Emergency Fund",
+          "target": 10000,
+          "current": 4500
+        }
+      ]
     }
   }
 }
